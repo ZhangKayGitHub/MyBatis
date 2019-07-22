@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kay.dao.IUserDao">
+
+    <!--对应下面的方法二： 配置查询结果的列名和实体类的属性名的对应关系-->
+    <resultMap id="userMap" type="com.kay.domain.User">
+        <!--主键字段的对应-->
+        <id property="userid" column="id"></id>
+        <!--非主键字段的对应-->
+        <result property="username" column="username"></result>
+        <result property="useraddress" column="address"></result>
+        <result property="usersex" column="sex"></result>
+        <result property="userbirthday" column="birthday"></result>
+    </resultMap>
+    <!--当我们要使用mybatis提供的配置的方式完成实体类的属性与数据库表的属性字段名的映射时，
+        就应该将select标签中的resultType属性改为：resultMap,当不使用mybatis提供的映射方式时，select标签中使用的属性时resultType，
+        使用映射的方式在执行效率上，可定没有在sql语句上起别名的效率高，但是开发效率变快了，
+        也就只对于所有需要封装返回结果select标签中都不用象方法一一样，对每个要查询的值都使用ongl表达式进行封装了-->
+        <select id="findAll" resultMap="userMap">
+    <!--<select id="findAll" resultType="com.kay.domain.User">-->
+        <!--由于实体类的属性与数据库表中的字段的名字不一致,因此在查询后返回结果时，
+        无法将查询的结果包装到实体类对应的属性中，
+        怎么解决呢？
+        方法一：
+            在SQL语句中起别名，让别名与实体类的属性名一致就可以了,这种方式也是执行效率最高的因为这是在数据库的层面进行的，-->
+             <!--select id as userid,username as userName,address as useraddress,sex as usersex,birthday as userbirthday from user;-->
+        <!--方法二：
+            通过配置的方式，mybatis为我们提供的
+            配置查询结果的列名和实体类的属性名的对应关系-->
+        select  * from user
+
+    </select>
+    <!--保存用户-->
+    <insert id="saveUser" parameterType="com.kay.domain.User">
+        <!--配置插入数据后，获取插入数据的id,其中 keyProperty 对应实体类的id，keyColumn对应的是表中的属性
+        resultType对应的返回值类型，order是限制性还是后执行该语句—— AFTER 代表的是在插入之后执行 -->
+        <selectKey keyProperty="userid" keyColumn="id" resultType="int" order="AFTER">
+            select last_insert_id();
+        </selectKey>
+        insert  into user(username,address,sex,birthday)values(#{username} ,#{useraddress},#{usersex},#{userbirthday})
+    </insert>
+    <!--更新用户-->
+    <update id="updateUser" parameterType="com.kay.domain.User">
+        update user set username=#{username},address=#{useraddress},sex=#{usersex},birthday=#{userbirthday} where id=#{userid}
+    </update>
+    <delete id="deleteUser" parameterType="java.lang.Integer">
+        delete from user where id=#{ldsfkjak}<!--此处知识占位符-->
+    </delete>
+    <!-- 根据id查询用户 -->
+    <select id="findById" parameterType="INT" resultType="com.kay.domain.User">
+        select id as userid,username as userName,address as useraddress,sex as usersex,birthday as userbirthday from user where id=#{uid}
+    </select>
+
+    <!--根据名称模糊查询-->
+    <select id="findByName" parameterType="String" resultType="com.kay.domain.User" >
+        select id as userid,username as userName,address as useraddress,sex as usersex,birthday as userbirthday from user where username like #{name}
+        <!--在模糊查询中上边的sql语句还可以这样写,这里的value 是mybatis源码中绑定的值，没有办法更改
+        select * from user where username like '%${value}%'-->
+        <!--以上的两种方式中第一中使用的是jdbc连接执行的预处理语句，也即是PrepatedStatement的参数占位符，
+        而第二种采用的是Statement对象的支付串拼接SQL -->
+    </select>
+    <!--使用聚合函数获得用户的总记录条数-->
+    <select id="findTotal" resultType="int">
+        select count(id) from user
+    </select>
+<!--
+MayBatis使用ognl表达式解析对象字段的值，#{}或者${}括号中的值为pojo属性名
+
+传递pojo包装对象：
+    开发中通过pojo传递查询体哦阿健，不仅包括用户查询条件还包括
+    其他的查询条件(比如见用户购买商品信息也作为查询条件)，这时可以使用包装对象传递输入参数。
+    Pojo类中包含pojo。
+    需求:根据用户名查询用户信息，查询条件放到QueryVo的userz属性中。
+-->
+
+    <!--OGNL表达式:
+        Object Graphic Navigation language
+        对象      图       导航      语言
+
+        它是通过对象的取值方法来获取数据，在写法上把get给省略了。
+        比如：我们获取用户的名称
+            类中的写法：user.getUsername();
+            OGNL表达式写法:user.username
+        mybatis中为什么能直接写username，而不使用user 呢？：
+                因为在paramenterType中已经提供了属性所属的类，所以此时不需要写对象的名，而是直接写属性名
+
+    -->
+
+    <!--根据QueryVo 的条件查询用户 (ognl表达式的用法)-->
+    <select id="findUserByVo" parameterType="com.kay.domain.QueryVo" resultType="com.kay.domain.User">
+        select * from user where username like #{user.username}<!--user是QueryVo的一个属性,username是QueryVo的getUsername()方法-->
+    </select>
+</mapper>
