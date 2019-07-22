@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kay.dao.IUserDao">
+
+    <!--配置查询所有 属性id是方法的名字-->
+    <select id="findAll" resultType="com.kay.domain.User">
+        select * from user
+    </select>
+</mapper>
