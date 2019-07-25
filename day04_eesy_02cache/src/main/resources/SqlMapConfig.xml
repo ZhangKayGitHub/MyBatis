@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <properties resource="jdbcConfig.properties">
+    </properties>
+    <!--使用typeAliases配置别名，它只能配置domain中的类的别名-->
+    <typeAliases>
+        <package name="com.kay.domain"></package>
+    </typeAliases>
+    <settings>
+        <!--该配置影响的所有映射器中配置的缓存的全局开关。-->
+        <setting name="cacheEnabled" value="true"/>
+    </settings>
+    <!--配置环境-->
+    <environments default="mysql">
+        <!--配置MySQL的环境-->
+        <environment id="mysql">
+            <!--配置事务-->
+            <transactionManager type="JDBC"></transactionManager>
+            <!--
+                1.连接池：
+                    我们在实际开发中都会用到连接池
+                    因为它可以减少我们获取连接所消耗的时间
+                2.mybatis中的连接池
+                    位置的位置：
+                        主要配置文件SqlMapConfig.xml中dataSource标签，type属性就是表示采用何种连接池方式
+                    type属性的取值：
+                        POOLED      采用传统的javax.sql.DataSource规范中的连接池，mybatis中针对规范的实现
+                        UNPOOLED    采用传统的获取连接的方式，虽然也实现了Javax.sql.DataSource接口，但是并没有使用池的思想
+                        JNDI        采用服务器提供的JNDI技术实现，来获取DataSource对象，不同的服务器所能拿到的连接数量是不同的
+                                    注意：如果不是web或者maven的war工程，是不能够使用的。
+                                    dbcp连接池
+
+            -->
+            <!--配置连接池-->
+            <dataSource type="POOLED">
+                <property name="driver" value="${jdbc.driver}"/>
+                <property name="url" value="${jdbc.url}"/>
+                <property name="username" value="${jdbc.username}"/>
+                <property name="password" value="${jdbc.password}"/>
+            </dataSource>
+        </environment>
+    </environments>
+    <!--配置映射文件的位置-->
+
+    <mappers>
+        <package name="com.kay.dao"></package>
+    </mappers>
+</configuration>
